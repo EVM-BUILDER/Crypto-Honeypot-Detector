@@ -3,7 +3,7 @@ export const apisUrl = 'http://localhost:8080/';
 
 // APIs
 // https://bsc.streamingfast.io/subgraphs/name/pancakeswap/exchange-v2
-export const PancakeSwapApi = 'https://bsc.streamingfast.io/subgraphs/name/pancakeswap/exchange-v2';
+export const PancakeSwapApi = 'https://graphnode-testnet-dex.pulsenet.io/subgraphs/name/pulseswap/exchange-v2' // 'https://bsc.streamingfast.io/subgraphs/name/pancakeswap/exchange-v2';
 // https://thegraph.com/hosted-service/subgraph/sushiswap/exchange
 export const SushiSwapApi = 'https://api.thegraph.com/subgraphs/name/sushiswap/exchange';
 // https://thegraph.com/hosted-service/subgraph/uniswap/uniswap-v2

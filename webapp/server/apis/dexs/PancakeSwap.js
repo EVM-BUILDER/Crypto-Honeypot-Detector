@@ -7,11 +7,11 @@ var web3 = new Web3(provider);
 // const
 const mainTokenAddress = '0x584D0eB0463a3Ac82D2A03fe1fE8F7bF6Ee066d5'; // WBNB
 const routerAddress = '0x299e8903Bc47c2FAa30f247BADa9bbf8A325f202';
-const multicallAddress = BSCaddress;
+const multicallAddress = '0xDBEd5aD321221ee5f050eb2eb7Ae2bA1EF7c4737';
 const mainTokentoSell = '0.001';
 const maxgas = 2000000;
 const minMain = 4;
-
+ 
 // ABIs
 const routerAbi = [
   {
@@ -569,13 +569,13 @@ async function testHoneypot(web3, tokenAddress, mainTokenAddress, routerAddress,
       var mainTokensymbol = await mainTokencontract.methods.symbol().call();
       var tokenSymbol = await tokenContract.methods.symbol().call();
       var tokenDecimals = await tokenContract.methods.decimals().call();
-      console.log('tokenDecimals', tokenDecimals);
 
       // For swaps, 20 minutes from now in time
       var timeStamp = web3.utils.toHex(Math.round(Date.now() / 1000) + 60 * 20);
 
       // Fixed value of MainTokens to sell
       var mainTokentoSellfixed = setDecimals(mainTokentoSell, mainTokenDecimals);
+      console.log('mainTokentoSellfixed', mainTokentoSellfixed);``
 
       // Approve to sell the MainToken in the Dex call
       var approveMainToken = mainTokencontract.methods.approve(routerAddress, '115792089237316195423570985008687907853269984665640564039457584007913129639935');
@@ -599,11 +599,13 @@ async function testHoneypot(web3, tokenAddress, mainTokenAddress, routerAddress,
         .aggregate(calls)
         .call()
         .catch((err) => console.log(err));
+      console.log('result', result);
 
       // If error it means there is not enough liquidity
       var error = false;
       if (result.returnData[0] != '0x00' && result.returnData[1] != '0x00') {
         var receivedTokens = web3.eth.abi.decodeLog([{ internalType: 'uint256[]', name: 'amounts', type: 'uint256[]' }], result.returnData[1]).amounts[1] * 10 ** -tokenDecimals;
+        console.log('receivedTokens', receivedTokens);
 
         // We will try to sell half of the Tokens
         var fixd = tokenDecimals;
@@ -613,6 +615,7 @@ async function testHoneypot(web3, tokenAddress, mainTokenAddress, routerAddress,
       } else {
         error = true;
       }
+      console.log('error', error);
 
       // Honeypot check variable
       var honeypot = false;
@@ -1080,8 +1083,6 @@ async function testHoneypotPlus(web3, tokenAddress, mainTokenAddress, routerAddr
 export async function main(req, res) {
   const tokenAddress = req.params.address;
   console.log('req.params', req.params);
-  console.log('tokenAddress', tokenAddress);
-  console.log('mainTokenAddress', mainTokenAddress);
   if (`${req.params.address2}`.toLowerCase() == mainTokenAddress.toLowerCase() || `${req.params.address2}`.toLowerCase() == 'default') {
     var honeypot = await testHoneypot(web3, tokenAddress, mainTokenAddress, routerAddress, multicallAddress, mainTokentoSell, maxgas, minMain);
 
