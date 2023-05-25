@@ -5,8 +5,8 @@ import { BSCprovider as provider } from '../../startConnection.js';
 var web3 = new Web3(provider);
 
 // const
-const mainTokenAddress = '0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c'; // WBNB
-const routerAddress = '0x10ED43C718714eb63d5aA57B78B54704E256024E';
+const mainTokenAddress = '0x584D0eB0463a3Ac82D2A03fe1fE8F7bF6Ee066d5'; // WBNB
+const routerAddress = '0x299e8903Bc47c2FAa30f247BADa9bbf8A325f202';
 const multicallAddress = BSCaddress;
 const mainTokentoSell = '0.001';
 const maxgas = 2000000;
@@ -569,6 +569,7 @@ async function testHoneypot(web3, tokenAddress, mainTokenAddress, routerAddress,
       var mainTokensymbol = await mainTokencontract.methods.symbol().call();
       var tokenSymbol = await tokenContract.methods.symbol().call();
       var tokenDecimals = await tokenContract.methods.decimals().call();
+      console.log('tokenDecimals', tokenDecimals);
 
       // For swaps, 20 minutes from now in time
       var timeStamp = web3.utils.toHex(Math.round(Date.now() / 1000) + 60 * 20);
@@ -780,6 +781,7 @@ async function testHoneypot(web3, tokenAddress, mainTokenAddress, routerAddress,
         });
       }
     } catch (err) {
+      console.log(err);
       if (err.message.includes('Invalid JSON')) {
         resolve({
           error: true,
@@ -1077,8 +1079,12 @@ async function testHoneypotPlus(web3, tokenAddress, mainTokenAddress, routerAddr
 
 export async function main(req, res) {
   const tokenAddress = req.params.address;
+  console.log('req.params', req.params);
+  console.log('tokenAddress', tokenAddress);
+  console.log('mainTokenAddress', mainTokenAddress);
   if (`${req.params.address2}`.toLowerCase() == mainTokenAddress.toLowerCase() || `${req.params.address2}`.toLowerCase() == 'default') {
     var honeypot = await testHoneypot(web3, tokenAddress, mainTokenAddress, routerAddress, multicallAddress, mainTokentoSell, maxgas, minMain);
+
     if (honeypot.error)
       return res.status(403).json({
         error: true,
