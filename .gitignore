@@ -5,3 +5,5 @@ webapp/server/package-lock.json
 webapp/client/node_modules/
 webapp/client/package-lock.json
 webapp/client/dist
+
+.idea
