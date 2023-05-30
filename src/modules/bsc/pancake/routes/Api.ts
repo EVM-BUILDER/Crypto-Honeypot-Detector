@@ -1,13 +1,10 @@
 'use strict';
 
 import {Router} from 'express';
-import TestApiController from '../controllers/Create';
+import PancakeSwapController from '../controllers/Main';
 
 const router = Router();
 
-// router.get('/', (req, res, next) => TestApiController.default.index(req, res, next));
-// router.get('/setmev', (req, res, next) => TestApiController.default.setMev(req, res, next));
-router.get('/check', (req, res, next) => TestApiController.index(req, res, next));
+router.get('/bsc/pancakeswap/:address/:address2', (req, res) => PancakeSwapController.index(req, res));
 
-// export = router;
 export = router;
