@@ -3,6 +3,7 @@ import express from 'express';
 import Routes from './Routes';
 import http from 'http';
 import cors from 'cors';
+import helmet from 'helmet';
 
 class Express {
     /**
@@ -29,7 +30,7 @@ class Express {
      */
     public async init() {
         this.mountRoutes();
-
+        this.express.set('trust proxy', 1);
         const options = {
             origin: ['*', 'https://pulsedexv4-dev.netlify.app'],
             methods: ['POST', 'GET', 'PUT', 'DELETE'],
@@ -37,7 +38,19 @@ class Express {
             optionsSuccessStatus: 200 // Some legacy browsers choke on 204
         };
         this.express.use(cors(options));
-
+        this.express.use(helmet.referrerPolicy({policy: 'same-origin'}));
+        this.express.use(helmet.crossOriginOpenerPolicy());
+        this.express.use(helmet.crossOriginResourcePolicy());
+        this.express.use(helmet.dnsPrefetchControl());
+        this.express.use(helmet.expectCt());
+        this.express.use(helmet.frameguard());
+        this.express.use(helmet.hidePoweredBy());
+        this.express.use(helmet.hsts());
+        this.express.use(helmet.ieNoOpen());
+        this.express.use(helmet.noSniff());
+        this.express.use(helmet.originAgentCluster());
+        this.express.use(helmet.permittedCrossDomainPolicies());
+        this.express.use(helmet.xssFilter());
         this.express.use(express.json({
             limit: 500000
         }));
