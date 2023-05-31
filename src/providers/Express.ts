@@ -2,6 +2,7 @@
 import express from 'express';
 import Routes from './Routes';
 import http from 'http';
+import cors from 'cors';
 
 class Express {
     /**
@@ -28,6 +29,14 @@ class Express {
      */
     public async init() {
         this.mountRoutes();
+
+        const options = {
+            origin: '*',
+            methods: ['POST', 'GET', 'PUT', 'DELETE'],
+            preflightContinue: false,
+            optionsSuccessStatus: 200 // Some legacy browsers choke on 204
+        };
+        this.express.use(cors(options));
 
         this.express.use(express.json({
             limit: 500000
