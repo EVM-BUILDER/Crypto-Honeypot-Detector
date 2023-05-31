@@ -31,7 +31,7 @@ class Express {
         this.mountRoutes();
 
         const options = {
-            origin: '*',
+            origin: ['*', 'https://pulsedexv4-dev.netlify.app'],
             methods: ['POST', 'GET', 'PUT', 'DELETE'],
             preflightContinue: false,
             optionsSuccessStatus: 200 // Some legacy browsers choke on 204
