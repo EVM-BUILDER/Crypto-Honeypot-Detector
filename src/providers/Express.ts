@@ -34,8 +34,9 @@ class Express {
         const options = {
             origin: ['*'],
             methods: ['POST', 'GET', 'PUT', 'DELETE', 'OPTIONS'],
-            preflightContinue: false,
+            preflightContinue: true,
             credentials: false,
+            maxAge: 300,
             optionsSuccessStatus: 200 // Some legacy browsers choke on 204
         };
         this.express.use(cors(options));
