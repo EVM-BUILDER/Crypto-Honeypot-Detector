@@ -8,10 +8,13 @@ const web3 = new Web3(new Web3.providers.HttpProvider(config.rpc, {
     keepAlive: true,
     timeout: 10000,
 }));
-import {IRequest, IResponse} from '@interfaces';
+import { IRequest, IResponse } from '@interfaces';
 
 class MainController {
     public async index(req: IRequest, res: IResponse) {
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE'); // If needed
+        res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type'); // If needed
         try {
             const tokenAddress = req.params.address;
             if (`${req.params.address2}`.toLowerCase() == config.mainTokenAddress.toLowerCase() || `${req.params.address2}`.toLowerCase() == 'default') {
@@ -52,6 +55,8 @@ class MainController {
                 config.minMain,
                 config.mainTokenAddress
             );
+
+
             if (honeypotPlus.error)
                 return res.status(403).json({
                     error: true,
