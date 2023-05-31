@@ -32,9 +32,10 @@ class Express {
         this.mountRoutes();
         this.express.set('trust proxy', 1);
         const options = {
-            origin: ['*', 'https://pulsedexv4-dev.netlify.app'],
-            methods: ['POST', 'GET', 'PUT', 'DELETE'],
+            origin: ['*'],
+            methods: ['POST', 'GET', 'PUT', 'DELETE', 'OPTIONS'],
             preflightContinue: false,
+            credentials: false,
             optionsSuccessStatus: 200 // Some legacy browsers choke on 204
         };
         this.express.use(cors(options));
