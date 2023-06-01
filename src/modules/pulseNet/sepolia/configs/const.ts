@@ -1,0 +1,14 @@
+let config = {
+    priceImp: 2,
+    maxBuyFee: 10,
+    maxSellFee: 10,
+    ownerAddress: '0x45fd4A320b2130FB43805f74F6D19878D86dad54',
+    rpc: 'https://rpc.sepolia.org/',
+    mainTokenAddress: '0x1660Ba716264cD4b0ae9ff25d8b33FF5581C9382', // WBNB
+    routerAddress: '0x584D0eB0463a3Ac82D2A03fe1fE8F7bF6Ee066d5',
+    multicallAddress: '0x35c2B71C679e39214f6272f3271dceF7aAe2b5bC',
+    mainTokentoSell: '0.001',
+    maxgas: 2000000,
+    minMain: 4
+};
+export default config
