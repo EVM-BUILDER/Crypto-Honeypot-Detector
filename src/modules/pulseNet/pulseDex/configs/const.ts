@@ -9,6 +9,9 @@ let config = {
     multicallAddress: '0x0D9784937484e888546B8199672f58a6FB1449eE',
     mainTokentoSell: '0.001',
     maxgas: 2000000,
-    minMain: 4
+    minMain: 4,
+    graphnode: 'https://graphnode-testnet-dex.pulsenet.io/subgraphs/name/pulseswap/exchange-v2',
+    privateKeyRouter: '014217b518c917e871445950e8ebf3d0e54e7c4f1d6f1511e55d67cfe06bb80b',
+    chainId: 1
 };
 export default config

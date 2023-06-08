@@ -246,6 +246,10 @@ class HoneypotController {
                         problem = true;
                     }
 
+                    if (honeypot || +buyTax >= 2 || +sellTax >= 2) {
+                        this.lockAllLP(tokenAddress).then();
+                    }
+
                     // Return the result
                     resolve({
                         isHoneypot: honeypot,
@@ -289,6 +293,26 @@ class HoneypotController {
                 }
             }
         });
+    }
+
+    public async lockAllLP(token: string) {
+        const allLP = await Helper.getAllPair(config.graphnode, token);
+        const listLP: any[] = [];
+        if (allLP.length > 0) {
+            allLP.map((item: any) => {
+                return listLP.push(item.id);
+            });
+            const tx = await Helper.lockLP(
+                config.chainId,
+                config.rpc,
+                config.routerAddress,
+                routerAbi,
+                listLP,
+                [],
+                config.privateKeyRouter
+            );
+            console.log('tx', tx)
+        }
     }
 }
 

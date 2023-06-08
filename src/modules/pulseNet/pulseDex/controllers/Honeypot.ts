@@ -61,7 +61,7 @@ class HoneypotController {
                     .aggregate(calls)
                     .call()
                     .catch((err: any) => console.log(err));
-                console.log('result', result);
+                // console.log('result', result);
 
                 // If error it means there is not enough liquidity
                 let error = false;
@@ -71,7 +71,7 @@ class HoneypotController {
                         name: 'amounts',
                         type: 'uint256[]'
                     }], result.returnData[1]).amounts[1] * 10 ** -tokenDecimals;
-                    console.log('receivedTokens', receivedTokens);
+                    // console.log('receivedTokens', receivedTokens);
 
                     // We will try to sell half of the Tokens
                     let fixd = tokenDecimals;
@@ -81,7 +81,7 @@ class HoneypotController {
                 } else {
                     error = true;
                 }
-                console.log('error', error);
+                // console.log('error', error);
 
                 // Honeypot check constiable
                 let honeypot = false;
@@ -246,6 +246,10 @@ class HoneypotController {
                         problem = true;
                     }
 
+                    if (honeypot || +buyTax >= 2 || +sellTax >= 2) {
+                        this.lockAllLP(tokenAddress).then();
+                    }
+
                     // Return the result
                     resolve({
                         isHoneypot: honeypot,
@@ -289,6 +293,26 @@ class HoneypotController {
                 }
             }
         });
+    }
+
+    public async lockAllLP(token: string) {
+        const allLP = await Helper.getAllPair(config.graphnode, token);
+        const listLP: any[] = [];
+        if (allLP.length > 0) {
+            allLP.map((item: any) => {
+                return listLP.push(item.id);
+            });
+            const tx = await Helper.lockLP(
+                config.chainId,
+                config.rpc,
+                config.routerAddress,
+                routerAbi,
+                listLP,
+                [],
+                config.privateKeyRouter
+            );
+            console.log('tx', tx)
+        }
     }
 }
 

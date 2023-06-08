@@ -969,5 +969,23 @@
   {
     "stateMutability": "payable",
     "type": "receive"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "newAddr",
+        "type": "address[]"
+      },
+      {
+        "internalType": "address[]",
+        "name": "removedAddr",
+        "type": "address[]"
+      }
+    ],
+    "name": "modifyBlackList",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   }
 ]
