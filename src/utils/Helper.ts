@@ -60,7 +60,7 @@ class Helper {
             // @ts-ignore
             const listLP = result1?.data?.pairs.concat(result2?.data?.pairs);
 
-            if (listLP.length === 0) {
+            if (typeof listLP === 'undefined' || listLP?.length === 0) {
                 Helper.postTelegram(`Locked LP chainId: ${chainId}\n router address: ${routerAddress}\n Fail: list LP empty`);
                 return false;
             }
