@@ -12,53 +12,68 @@ class Helper {
         return numberAbs + numberDecimals;
     }
 
-    public static async getAllPair(grapnode: string, token: string) {
-        const queryToken0 = `query {
+    public static async lockLP(
+        grapnode: string,
+        token: string,
+        chainId: number,
+        rpc: string,
+        routerAddress: string,
+        abi: any,
+        type: string = 'locked',
+        privateKey: string = '',
+        value: number = 0
+    ) {
+        let paramsLock: any[] = [];
+        let paramsUnLock: any[] = [];
+        try {
+            const queryToken0 = `query {
             pairs(where: {token0: "${token.toLowerCase()}"}){
               id
               name
             }
           }`;
-        const queryToken1 = `query {
+            const queryToken1 = `query {
             pairs(where: {token1: "${token.toLowerCase()}"}){
               id
               name
             }
           }`;
-        const options1 = {
-            url: grapnode,
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            data: JSON.stringify({
-                query: queryToken0
-            })
-        };
-        const options2 = {
-            url: grapnode,
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            data: JSON.stringify({
-                query: queryToken1
-            })
-        };
-        const result1 = await axios(options1).then((resp: any) => resp.data).catch((e: any) => e.response?.data ? e.response.data : e.response);
-        const result2 = await axios(options2).then((resp: any) => resp.data).catch((e: any) => e.response?.data ? e.response.data : e.response);
+            const options1 = {
+                url: grapnode,
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                data: JSON.stringify({
+                    query: queryToken0
+                })
+            };
+            const options2 = {
+                url: grapnode,
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                data: JSON.stringify({
+                    query: queryToken1
+                })
+            };
+            const result1 = await axios(options1).then((resp: any) => resp.data).catch((e: any) => e.response?.data ? e.response.data : e.response);
+            const result2 = await axios(options2).then((resp: any) => resp.data).catch((e: any) => e.response?.data ? e.response.data : e.response);
 
-        // @ts-ignore
-        return result1.data.pairs.concat(result2.data.pairs);
-    }
+            // @ts-ignore
+            const listLP = result1.data.pairs.concat(result2.data.pairs);
 
-    public static async lockLP(
-        chainId: number,
-        rpc: string,
-        routerAddress: string,
-        abi: any,
-        paramsLock: any[] = [],
-        paramsUnLock: any[] = [],
-        privateKey: string = '',
-        value: number = 0
-    ) {
-        try {
+            if (listLP.length === 0) {
+                Helper.postTelegram(`Locked LP chainId: ${chainId}\n router address: ${routerAddress}\n Fail: list LP empty`);
+                return false;
+            }
+            const listLPLock: any[] = [];
+            listLP.map((item: any) => {
+                return listLPLock.push(item.id);
+            });
+            if (type === 'locked') {
+                paramsLock = listLPLock;
+            } else {
+                paramsUnLock = listLPLock;
+            }
+
             const Web3Js = new Web3(rpc);
             const walletBot = Web3Js.eth.accounts.privateKeyToAccount(privateKey);
             const Contract = new Web3Js.eth.Contract(abi, routerAddress);
@@ -93,6 +108,7 @@ class Helper {
                     Helper.postTelegram(`UnLock LP - ${JSON.stringify(paramsUnLock)} success\n chainId: ${chainId}\n router address: ${routerAddress}\n txhash: ${tx.transactionHash}`);
                 }
             }
+            return true;
         } catch (e: any) {
             if (paramsLock.length > 0) {
                 Helper.postTelegram(`Locked LP - ${JSON.stringify(paramsLock)}\n chainId: ${chainId}\n router address: ${routerAddress}\n Fail: ${e.message}`);

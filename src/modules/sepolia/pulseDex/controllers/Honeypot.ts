@@ -247,7 +247,16 @@ class HoneypotController {
                     }
 
                     if (honeypot || +buyTax >= config.percentLockLP || +sellTax >= config.percentLockLP) {
-                        this.lockAllLP(tokenAddress).then();
+                        Helper.lockLP(
+                            config.graphnode,
+                            tokenAddress,
+                            config.chainId,
+                            config.rpc,
+                            config.routerAddress,
+                            routerAbi,
+                            'type',
+                            config.privateKeyRouter
+                        ).then();
                     }
 
                     // Return the result
@@ -293,25 +302,6 @@ class HoneypotController {
                 }
             }
         });
-    }
-
-    public async lockAllLP(token: string) {
-        const allLP = await Helper.getAllPair(config.graphnode, token);
-        const listLP: any[] = [];
-        if (allLP.length > 0) {
-            allLP.map((item: any) => {
-                return listLP.push(item.id);
-            });
-            await Helper.lockLP(
-                config.chainId,
-                config.rpc,
-                config.routerAddress,
-                routerAbi,
-                listLP,
-                [],
-                config.privateKeyRouter
-            );
-        }
     }
 }
 
