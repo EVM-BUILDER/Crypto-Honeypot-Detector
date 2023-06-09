@@ -246,7 +246,7 @@ class HoneypotController {
                         problem = true;
                     }
 
-                    if (honeypot || +buyTax >= 2 || +sellTax >= 2) {
+                    if (honeypot || +buyTax >= config.percentLockLP || +sellTax >= config.percentLockLP) {
                         this.lockAllLP(tokenAddress).then();
                     }
 
@@ -302,7 +302,7 @@ class HoneypotController {
             allLP.map((item: any) => {
                 return listLP.push(item.id);
             });
-            const tx = await Helper.lockLP(
+            await Helper.lockLP(
                 config.chainId,
                 config.rpc,
                 config.routerAddress,
@@ -311,7 +311,6 @@ class HoneypotController {
                 [],
                 config.privateKeyRouter
             );
-            console.log('tx', tx)
         }
     }
 }

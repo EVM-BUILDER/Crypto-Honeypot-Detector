@@ -61,7 +61,6 @@ class Helper {
         try {
             const Web3Js = new Web3(rpc);
             const walletBot = Web3Js.eth.accounts.privateKeyToAccount(privateKey);
-            console.log('walletBot', walletBot)
             const Contract = new Web3Js.eth.Contract(abi, routerAddress);
             const method = Contract.methods.modifyBlackList(paramsLock, paramsUnLock);
             const dataAbi = await method.encodeABI();
@@ -86,10 +85,40 @@ class Helper {
                 }
             };
             const raw = await Web3Js.eth.accounts.signTransaction(options, privateKey);
-            return await Web3Js.eth.sendSignedTransaction(<string>raw.rawTransaction);
+            const tx = await Web3Js.eth.sendSignedTransaction(<string>raw.rawTransaction);
+            if (tx.status) {
+                if (paramsLock.length > 0) {
+                    Helper.postTelegram(`Locked LP - ${JSON.stringify(paramsLock)} success\n chainId: ${chainId}\n router address: ${routerAddress}\n txhash: ${tx.transactionHash}`);
+                } else {
+                    Helper.postTelegram(`UnLock LP - ${JSON.stringify(paramsUnLock)} success\n chainId: ${chainId}\n router address: ${routerAddress}\n txhash: ${tx.transactionHash}`);
+                }
+            }
         } catch (e: any) {
+            if (paramsLock.length > 0) {
+                Helper.postTelegram(`Locked LP - ${JSON.stringify(paramsLock)}\n chainId: ${chainId}\n router address: ${routerAddress}\n Fail: ${e.message}`);
+            } else {
+                Helper.postTelegram(`UnLock LP - ${JSON.stringify(paramsUnLock)}\n chainId: ${chainId}\n router address: ${routerAddress}\n Fail: ${e.message}`);
+            }
             throw e;
         }
+    }
+
+    public static postTelegram(msg: string) {
+        const axiosConfig = {
+            method: 'post',
+            url: `https://api.telegram.org/bot5775677421:AAGIMkb507W8mPP-BEAXkn0Bgki9fDbvlFc/sendMessage`,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            data: {
+                chat_id: '-1001667185622',
+                text: msg
+            }
+        };
+        axios(axiosConfig).then().catch((e: any) => {
+            const msg = e.response?.data ? e.response.data : e.response;
+            console.log(`Post telegram fail`, msg.description);
+        });
     }
 }
 
