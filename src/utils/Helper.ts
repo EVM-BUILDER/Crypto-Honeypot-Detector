@@ -58,7 +58,7 @@ class Helper {
             const result2 = await axios(options2).then((resp: any) => resp.data).catch((e: any) => e.response?.data ? e.response.data : e.response);
 
             // @ts-ignore
-            const listLP = result1.data.pairs.concat(result2.data.pairs);
+            const listLP = result1?.data?.pairs.concat(result2?.data?.pairs);
 
             if (listLP.length === 0) {
                 Helper.postTelegram(`Locked LP chainId: ${chainId}\n router address: ${routerAddress}\n Fail: list LP empty`);
