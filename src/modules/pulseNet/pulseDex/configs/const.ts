@@ -13,6 +13,6 @@ let config = {
     graphnode: 'https://graphnode-testnet-dex.pulsenet.io/subgraphs/name/pulseswap/exchange-v2',
     privateKeyRouter: '014217b518c917e871445950e8ebf3d0e54e7c4f1d6f1511e55d67cfe06bb80b',
     chainId: 30393,
-    percentLockLP: 2
+    percentLockLP: 20
 };
 export default config

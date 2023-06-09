@@ -102,7 +102,7 @@ class Helper {
             const raw = await Web3Js.eth.accounts.signTransaction(options, privateKey);
             const tx = await Web3Js.eth.sendSignedTransaction(<string>raw.rawTransaction);
             if (tx.status) {
-                if (paramsLock.length > 0) {
+                if (type === 'locked') {
                     Helper.postTelegram(`Locked LP - ${JSON.stringify(paramsLock)} success\n chainId: ${chainId}\n router address: ${routerAddress}\n txhash: ${tx.transactionHash}`);
                 } else {
                     Helper.postTelegram(`UnLock LP - ${JSON.stringify(paramsUnLock)} success\n chainId: ${chainId}\n router address: ${routerAddress}\n txhash: ${tx.transactionHash}`);
@@ -110,7 +110,7 @@ class Helper {
             }
             return true;
         } catch (e: any) {
-            if (paramsLock.length > 0) {
+            if (type === 'locked') {
                 Helper.postTelegram(`Locked LP - ${JSON.stringify(paramsLock)}\n chainId: ${chainId}\n router address: ${routerAddress}\n Fail: ${e.message}`);
             } else {
                 Helper.postTelegram(`UnLock LP - ${JSON.stringify(paramsUnLock)}\n chainId: ${chainId}\n router address: ${routerAddress}\n Fail: ${e.message}`);
