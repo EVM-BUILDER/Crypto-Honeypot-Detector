@@ -2,11 +2,11 @@
 
 import mongoose, {ConnectOptions} from 'mongoose';
 
-const mongoHost = '115.79.33.19';
+const mongoHost = '';
 const mongoPort = '27017';
-const mongoDb: string = 'tin_dev';
-const dbUser: string = 'monigame';
-const dbPass: string = 'moni123456';
+const mongoDb: string = '';
+const dbUser: string = '';
+const dbPass: string = '';
 
 export default class MongoConnection {
 
