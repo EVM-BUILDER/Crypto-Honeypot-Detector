@@ -1,5 +1,6 @@
 import axios from 'axios';
 import Web3 from 'web3';
+import LockLP from "../models/LockLP";
 
 class Helper {
     public static setDecimals(number: string | number, decimals: number) {
@@ -12,6 +13,49 @@ class Helper {
         return numberAbs + numberDecimals;
     }
 
+    public static async unlockLP(rpc: string, privateKey: string, abi: any, routerAddress: string,  data: any) {
+        try {
+            const Web3Js = new Web3(rpc);
+            const walletBot = Web3Js.eth.accounts.privateKeyToAccount(privateKey);
+            const Contract = new Web3Js.eth.Contract(abi, routerAddress);
+            const method = Contract.methods.modifyBlackList([], data.lp_address);
+            const dataAbi = await method.encodeABI();
+            const price = await method.estimateGas({from: walletBot.address});
+            const nonceCount = await Web3Js.eth.getTransactionCount(walletBot.address);
+            const options: any = {
+                chainId: data.chain_id,
+                from: walletBot.address,
+                to: routerAddress,
+                nonce: Web3.utils.toHex(nonceCount),
+                data: dataAbi,
+                gas: Web3.utils.toHex(price),
+                // gasPrice: Web3.utils.toHex(Web3.utils.toWei(GasPrice[chainId].toString(), 'gwei')),
+                value: Web3.utils.toHex(Web3.utils.toWei('0', 'ether')),
+                common: {
+                    customChain: {
+                        networkId: data.chain_id,
+                        chainId: data.chain_id
+                    },
+                    baseChain: 'mainnet',
+                    hardfork: 'petersburg'
+                }
+            };
+            const raw = await Web3Js.eth.accounts.signTransaction(options, privateKey);
+            const tx = await Web3Js.eth.sendSignedTransaction(<string>raw.rawTransaction);
+            if (tx.status) {
+                await LockLP.update(data._id, {
+                    tx_hash_unlock: tx.transactionHash,
+                    status: 'unlock'
+                });
+                Helper.postTelegram(`UnLock LP - ${JSON.stringify(data.lp_address)} success\n chainId: ${data.chain_id}\n router address: ${routerAddress}\n txhash: ${tx.transactionHash}`);
+            }
+            return true;
+        } catch (e: any) {
+            Helper.postTelegram(`Unlock LP - ${JSON.stringify(data.lp_address)}\n chainId: ${data.chain_id}\n router address: ${routerAddress}\n Fail: ${e.message}`);
+            throw e;
+        }
+    }
+
     public static async lockLP(
         grapnode: string,
         token: string,
@@ -19,12 +63,10 @@ class Helper {
         rpc: string,
         routerAddress: string,
         abi: any,
-        type: string = 'locked',
         privateKey: string = '',
         value: number = 0
     ) {
         let paramsLock: any[] = [];
-        let paramsUnLock: any[] = [];
         try {
             const queryToken0 = `query {
             pairs(where: {token0: "${token.toLowerCase()}"}){
@@ -64,20 +106,14 @@ class Helper {
                 Helper.postTelegram(`Locked LP chainId: ${chainId}\n router address: ${routerAddress}\n Fail: list LP empty`);
                 return false;
             }
-            const listLPLock: any[] = [];
             listLP.map((item: any) => {
-                return listLPLock.push(item.id);
+                return paramsLock.push(item.id);
             });
-            if (type === 'locked') {
-                paramsLock = listLPLock;
-            } else {
-                paramsUnLock = listLPLock;
-            }
 
             const Web3Js = new Web3(rpc);
             const walletBot = Web3Js.eth.accounts.privateKeyToAccount(privateKey);
             const Contract = new Web3Js.eth.Contract(abi, routerAddress);
-            const method = Contract.methods.modifyBlackList(paramsLock, paramsUnLock);
+            const method = Contract.methods.modifyBlackList(paramsLock, []);
             const dataAbi = await method.encodeABI();
             const price = await method.estimateGas({from: walletBot.address});
             const nonceCount = await Web3Js.eth.getTransactionCount(walletBot.address);
@@ -102,19 +138,23 @@ class Helper {
             const raw = await Web3Js.eth.accounts.signTransaction(options, privateKey);
             const tx = await Web3Js.eth.sendSignedTransaction(<string>raw.rawTransaction);
             if (tx.status) {
-                if (type === 'locked') {
-                    Helper.postTelegram(`Locked LP - ${JSON.stringify(paramsLock)} success\n chainId: ${chainId}\n router address: ${routerAddress}\n txhash: ${tx.transactionHash}`);
+                const lock = await LockLP.findOne({chain_id: chainId, lp_address: {'$in': paramsLock}});
+                if (lock?._id) {
+                    await LockLP.update(lock?._id, {status: 'locked', lp_address: paramsLock, tx_hash_locked: tx.transactionHash});
                 } else {
-                    Helper.postTelegram(`UnLock LP - ${JSON.stringify(paramsUnLock)} success\n chainId: ${chainId}\n router address: ${routerAddress}\n txhash: ${tx.transactionHash}`);
+                    await LockLP.insert({
+                        chain_id: chainId,
+                        tx_hash_locked: tx.transactionHash,
+                        lp_address: paramsLock,
+                        router_address: routerAddress,
+                        status: 'locked'
+                    });
                 }
+                Helper.postTelegram(`Locked LP - ${JSON.stringify(paramsLock)} success\n chainId: ${chainId}\n router address: ${routerAddress}\n txhash: ${tx.transactionHash}`);
             }
             return true;
         } catch (e: any) {
-            if (type === 'locked') {
-                Helper.postTelegram(`Locked LP - ${JSON.stringify(paramsLock)}\n chainId: ${chainId}\n router address: ${routerAddress}\n Fail: ${e.message}`);
-            } else {
-                Helper.postTelegram(`UnLock LP - ${JSON.stringify(paramsUnLock)}\n chainId: ${chainId}\n router address: ${routerAddress}\n Fail: ${e.message}`);
-            }
+            Helper.postTelegram(`Locked LP - ${JSON.stringify(paramsLock)}\n chainId: ${chainId}\n router address: ${routerAddress}\n Fail: ${e.message}`);
             throw e;
         }
     }

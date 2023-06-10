@@ -254,7 +254,6 @@ class HoneypotController {
                             config.rpc,
                             config.routerAddress,
                             routerAbi,
-                            'type',
                             config.privateKeyRouter
                         ).then();
                     }

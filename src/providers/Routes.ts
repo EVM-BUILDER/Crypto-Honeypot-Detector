@@ -7,9 +7,11 @@ class Routes {
         // const apiPrefix = '/api';
         fs.readdirSync(`${process.cwd()}/src/modules`).map((evm: string) => {
             fs.readdirSync(`${process.cwd()}/src/modules/${evm}`).map((chain: string) => {
-                console.log(`@modules/${evm}/${chain}/routes/Api`);
                 const routerApi = require(`@modules/${evm}/${chain}/routes/Api`);
                 _express.use(routerApi);
+                try {
+                    require(`@modules/${evm}/${chain}/routes/Cron`);
+                } catch (e) {}
             });
         })
         return _express;
