@@ -9,6 +9,7 @@ const web3 = new Web3(new Web3.providers.HttpProvider(config.rpc, {
     timeout: 10000,
 }));
 import { IRequest, IResponse } from '@interfaces';
+import axios from "axios";
 
 class MainController {
     public async index(req: IRequest, res: IResponse) {
@@ -70,6 +71,52 @@ class MainController {
             return res.json({
                 data: honeypotPlus,
             });
+        } catch (e: any) {
+            return res.status(500).json({
+                status: 'error',
+                msg: e.message
+            });
+        }
+    }
+
+    public async queryLP(_req: IRequest, res: IResponse) {
+        try {
+            const grapnode = 'http://192.168.20.16:8000/subgraphs/name/pulseswap/exchange-v2';
+            const token = '0x16991Eb10b25878819302F9b839C220a0a8B4803';
+            const queryToken0 = `query {
+            pairs(where: {token0: "${token.toLowerCase()}"}){
+              id
+              name
+            }
+          }`;
+            const queryToken1 = `query {
+            pairs(where: {token1: "${token.toLowerCase()}"}){
+              id
+              name
+            }
+          }`;
+            const options1 = {
+                url: grapnode,
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                data: JSON.stringify({
+                    query: queryToken0
+                })
+            };
+            const options2 = {
+                url: grapnode,
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                data: JSON.stringify({
+                    query: queryToken1
+                })
+            };
+            const result1 = await axios(options1).then((resp: any) => resp.data).catch((e: any) => e.response?.data ? e.response.data : e.response);
+            const result2 = await axios(options2).then((resp: any) => resp.data).catch((e: any) => e.response?.data ? e.response.data : e.response);
+
+            // @ts-ignore
+            const listLP = result1?.data?.pairs.concat(result2?.data?.pairs);
+            return res.status(200).json({listLP});
         } catch (e: any) {
             return res.status(500).json({
                 status: 'error',
