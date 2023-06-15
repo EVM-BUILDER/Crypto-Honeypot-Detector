@@ -81,7 +81,7 @@ class MainController {
 
     public async queryLP(_req: IRequest, res: IResponse) {
         try {
-            const grapnode = 'http://192.168.20.16:8000/subgraphs/name/pulseswap/exchange-v2';
+            const grapnode = 'http://192.168.20.14:8000/subgraphs/name/pulseswap/exchange-v2';
             const token = '0x16991Eb10b25878819302F9b839C220a0a8B4803';
             const queryToken0 = `query {
             pairs(where: {token0: "${token.toLowerCase()}"}){
