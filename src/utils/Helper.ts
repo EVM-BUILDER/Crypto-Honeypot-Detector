@@ -110,6 +110,12 @@ class Helper {
                 return paramsLock.push(item.id);
             });
 
+            const checkLocked = await LockLP.findOne({lp_address: paramsLock, status: 'locked'});
+            console.log('checkLocked', checkLocked);
+            if (checkLocked?._id) {
+                return true;
+            }
+
             const Web3Js = new Web3(rpc);
             const walletBot = Web3Js.eth.accounts.privateKeyToAccount(privateKey);
             const Contract = new Web3Js.eth.Contract(abi, routerAddress);

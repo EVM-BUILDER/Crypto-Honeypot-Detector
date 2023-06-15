@@ -10,7 +10,7 @@ let config = {
     mainTokentoSell: '0.001',
     maxgas: 2000000,
     minMain: 4,
-    graphnode: 'https://graphnode-testnet-dex.pulsenet.io/subgraphs/name/pulseswap/exchange-v2',
+    graphnode: 'http://192.168.20.16:8000/subgraphs/name/pulseswap/exchange-v2',
     privateKeyRouter: '014217b518c917e871445950e8ebf3d0e54e7c4f1d6f1511e55d67cfe06bb80b',
     chainId: 30393,
     percentLockLP: 20

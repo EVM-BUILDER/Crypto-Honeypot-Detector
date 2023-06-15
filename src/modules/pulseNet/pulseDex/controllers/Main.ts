@@ -56,7 +56,6 @@ class MainController {
                 config.mainTokenAddress
             );
 
-
             if (honeypotPlus.error)
                 return res.status(403).json({
                     error: true,

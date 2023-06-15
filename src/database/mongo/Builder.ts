@@ -53,7 +53,6 @@ export default class BuilderMongoDB {
 			throw 'Data insert is not correct';
 		}
 		data.created = Date.now();
-		console.log('data', data);
 		return await this.Client.create(data).then((resp: any) => resp._id);
 	}
 
