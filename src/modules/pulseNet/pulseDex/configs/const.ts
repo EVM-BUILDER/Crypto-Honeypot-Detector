@@ -5,7 +5,7 @@ let config = {
     ownerAddress: '0x45fd4A320b2130FB43805f74F6D19878D86dad54',
     rpc: 'https://testnet-rpc-dataseed1.pulsenet.io/',
     mainTokenAddress: '0x584D0eB0463a3Ac82D2A03fe1fE8F7bF6Ee066d5', // WBNB
-    routerAddress: '0xA338Dc0CBf5799E436A6D9F3505919c647B6fd12',
+    routerAddress: '0xD2D47BCB9690F500D1d142f26f62fC417cf21CB6',
     multicallAddress: '0x0D9784937484e888546B8199672f58a6FB1449eE',
     mainTokentoSell: '0.001',
     maxgas: 2000000,
