@@ -13,6 +13,72 @@ class Helper {
         return numberAbs + numberDecimals;
     }
 
+    // check and add time Locker LP
+    public static async checkLockerLP(lp: string, grapnode: string) {
+        try {
+            const options = {
+                url: grapnode,
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                data: JSON.stringify({
+                    query: `query {
+                        pairs(where: {token0: "${lp.toLowerCase()}"}){
+                          id
+                          name
+                        }
+                      }`
+                })
+            };
+            const result = await axios(options).then((resp: any) => resp.data).catch((e: any) => e.response?.data ? e.response.data : e.response);
+            return result?.data?.lockLPs;
+        } catch (e) {
+            throw e;
+        }
+    }
+
+    public static async AddLockerLP(rpc: string, chainId: number, tokenAddress: string, lpAddress: string,  privateKey: string, abi: any, LockerAddress: string,  data: any = []) {
+        try {
+            const Web3Js = new Web3(rpc);
+            const walletBot = Web3Js.eth.accounts.privateKeyToAccount(privateKey);
+            const Contract = new Web3Js.eth.Contract(abi, LockerAddress);
+            const method = Contract.methods.changeLock(...data);
+            const dataAbi = await method.encodeABI();
+            const price = await method.estimateGas({from: walletBot.address});
+            const nonceCount = await Web3Js.eth.getTransactionCount(walletBot.address);
+            const options: any = {
+                chainId: chainId,
+                from: walletBot.address,
+                to: LockerAddress,
+                nonce: Web3.utils.toHex(nonceCount),
+                data: dataAbi,
+                gas: Web3.utils.toHex(price),
+                // gasPrice: Web3.utils.toHex(Web3.utils.toWei(GasPrice[chainId].toString(), 'gwei')),
+                value: Web3.utils.toHex(Web3.utils.toWei('0', 'ether')),
+                common: {
+                    customChain: {
+                        networkId: chainId,
+                        chainId: chainId
+                    },
+                    baseChain: 'mainnet',
+                    hardfork: 'petersburg'
+                }
+            };
+            const raw = await Web3Js.eth.accounts.signTransaction(options, privateKey);
+            const tx = await Web3Js.eth.sendSignedTransaction(<string>raw.rawTransaction);
+            if (tx.status) {
+                await LockLP.update(data._id, {
+                    tx_hash_add_locker: tx.transactionHash
+                });
+                Helper.postTelegram(`LP address - ${lpAddress}\n ChainId: ${chainId}\n Token address: ${tokenAddress}\n Add locker success - txhash: ${tx.transactionHash}`);
+            }
+            return true;
+        } catch (e: any) {
+            Helper.postTelegram(`LP address - ${lpAddress}\n ChainId: ${chainId}\n Token address: ${tokenAddress}\n Add locker Fail: ${e.message}`);
+            throw e;
+        }
+    }
+
+    // lock and unlock LP swap transfer
     public static async unlockLP(rpc: string, privateKey: string, abi: any, routerAddress: string,  data: any) {
         try {
             const Web3Js = new Web3(rpc);

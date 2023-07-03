@@ -987,5 +987,28 @@
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "userAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "startLP",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "moreTime",
+        "type": "uint256"
+      }
+    ],
+    "name": "changeLock",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   }
 ]
