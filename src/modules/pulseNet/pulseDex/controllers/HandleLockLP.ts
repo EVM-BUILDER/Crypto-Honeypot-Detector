@@ -13,7 +13,7 @@ const web3 = new Web3(new Web3.providers.HttpProvider(config.rpc, {
 
 class HandleLockLP {
     public async index() {
-
+        await Helper.postTelegram('cronjob handle lock LP');
         const lockedTime = new Date(new Date().getTime() - 15 * 60 * 1000).valueOf(); // * 60
         const listLP = await lockLPModel.find({chain_id: config.chainId, status: 'locked'});
 
