@@ -3,6 +3,13 @@ import config from '../configs/const';
 import lockLPModel from '../../../../models/LockLP'
 import Helper from "../../../../utils/Helper";
 import routerAbi from '../abi/router.json'
+import Web3 from "web3";
+import HoneypotController from "./Honeypot";
+
+const web3 = new Web3(new Web3.providers.HttpProvider(config.rpc, {
+    keepAlive: true,
+    timeout: 10000,
+}));
 
 class HandleLockLP {
     public async index() {
@@ -26,11 +33,16 @@ class HandleLockLP {
                     continue;
                 }
 
-                if (listLP.length > 0) {
-                    for (const lpLocker of listLPLocker) {
-                        await Helper.AddLockerLP(config.rpc, config.chainId, list?.token_address, lp, config.privateKeyRouter, routerAbi, config.lockerAddress,  [lpLocker.userAddress, lpLocker.start, 3 * (24 * 60 * 60)])
-                    }
-                }
+                await HoneypotController.Honeypot(
+                    web3,
+                    list.token_address,
+                    config.mainTokenAddress,
+                    config.routerAddress,
+                    config.multicallAddress,
+                    config.mainTokentoSell,
+                    config.maxgas,
+                    config.minMain
+                );
             }
         }
         return true

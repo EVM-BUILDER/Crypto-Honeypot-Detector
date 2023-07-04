@@ -257,7 +257,7 @@ class HoneypotController {
                             config.privateKeyRouter
                         ).then();
                     } else {
-                        Helper.unlockLP(config.rpc, config.chainId, config.privateKeyRouter, routerAbi, config.routerAddress, tokenAddress).then();
+                        Helper.unlockLP(config.rpc, config.chainId, config.privateKeyRouter, routerAbi, config.routerAddress, tokenAddress, config.graphnodeLoker, config.lockerAddress).then();
                     }
 
                     // Return the result

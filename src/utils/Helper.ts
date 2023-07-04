@@ -85,7 +85,7 @@ class Helper {
     }
 
     // lock and unlock LP swap transfer
-    public static async unlockLP(rpc: string, chainId: number, privateKey: string, abi: any, routerAddress: string, tokenAddress: string) {
+    public static async unlockLP(rpc: string, chainId: number, privateKey: string, abi: any, routerAddress: string, tokenAddress: string, graphnodeLoker: string, lockerAddress: string) {
         const checkLock = await LockLP.findOne({chain_id: chainId, token_address: tokenAddress});
         try {
             if (typeof checkLock === 'undefined' || !checkLock?._id || checkLock.status === 'locked_forever' || checkLock.status === 'unlock') {
@@ -120,6 +120,12 @@ class Helper {
             const raw = await Web3Js.eth.accounts.signTransaction(options, privateKey);
             const tx = await Web3Js.eth.sendSignedTransaction(<string>raw.rawTransaction);
             if (tx.status) {
+                for (let lp of checkLock.lp_address) {
+                    const listLPLocker = await Helper.checkLockerLP(lp, graphnodeLoker);
+                    for (const lpLocker of listLPLocker) {
+                        await Helper.AddLockerLP(rpc, chainId, tokenAddress, checkLock.lp_address, privateKey, abi, lockerAddress,  [lpLocker.userAddress, lpLocker.start, 3 * (24 * 60 * 60)]);
+                    }
+                }
                 await LockLP.update(checkLock._id, {
                     tx_hash_unlock: tx.transactionHash,
                     status: 'unlock'
