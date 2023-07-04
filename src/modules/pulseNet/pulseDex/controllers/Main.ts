@@ -3,7 +3,7 @@ import Web3 from 'web3';
 import config from '../configs/const';
 import HoneypotController from './Honeypot';
 import HoneypotPlusController from './HoneypotPlus';
-import LockLP from "../models/LockLP";
+import LockLP from "../../../../models/LockLP";
 
 const web3 = new Web3(new Web3.providers.HttpProvider(config.rpc, {
     keepAlive: true,
