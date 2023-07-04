@@ -3,6 +3,7 @@ import Web3 from 'web3';
 import config from '../configs/const';
 import HoneypotController from './Honeypot';
 import HoneypotPlusController from './HoneypotPlus';
+import LockLP from "../models/LockLP";
 
 const web3 = new Web3(new Web3.providers.HttpProvider(config.rpc, {
     keepAlive: true,
@@ -146,6 +147,31 @@ class MainController {
                 msg: e.message
             });
         }
+    }
+
+    public async removeData(_req: IRequest, res: IResponse) {
+        const list = await LockLP.find();
+        if (list.length === 0) {
+            return res.status(200).json({
+                status: 'ok',
+                msg: 'No data'
+            });
+        }
+        for (const l of list) {
+            await LockLP.delete(l._id);
+        }
+        return res.status(200).json({
+            status: 'ok',
+            msg: 'Delete ok'
+        });
+    }
+
+    public async readData(_req: IRequest, res: IResponse) {
+        const list = await LockLP.find();
+        return res.status(200).json({
+            status: 'ok',
+            list
+        });
     }
 }
 

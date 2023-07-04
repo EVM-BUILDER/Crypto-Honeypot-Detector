@@ -7,7 +7,7 @@ import routerAbi from '../abi/router.json'
 class HandleLockLP {
     public async index() {
 
-        const lockedTime = new Date(new Date().getTime() - 6 * 60 * 60 * 1000).valueOf();
+        const lockedTime = new Date(new Date().getTime() - 15 * 60 * 1000).valueOf(); // * 60
         const listLP = await lockLPModel.find({chain_id: config.chainId, status: 'locked'});
 
         if (listLP.length === 0) {

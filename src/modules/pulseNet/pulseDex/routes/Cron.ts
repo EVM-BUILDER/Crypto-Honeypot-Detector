@@ -1,7 +1,7 @@
 import cron from "node-cron";
 import HandleLockLP from '../controllers/HandleLockLP';
 
-cron.schedule('* */1 * * * *', () => {
+cron.schedule('* */14 * * * *', () => {
     HandleLockLP.index().then();
 });
 
