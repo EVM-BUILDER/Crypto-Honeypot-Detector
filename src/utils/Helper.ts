@@ -77,7 +77,7 @@ class Helper {
                 });
                 Helper.postTelegram(`LP address - ${lpAddress}\n ChainId: ${chainId}\n Token address: ${tokenAddress}\n Add locker success - txhash: ${tx.transactionHash}`);
             }
-            return true;
+            return tx;
         } catch (e: any) {
             Helper.postTelegram(`LP address - ${lpAddress}\n ChainId: ${chainId}\n Token address: ${tokenAddress}\n Add locker Fail: ${e.message}`);
             throw e;
