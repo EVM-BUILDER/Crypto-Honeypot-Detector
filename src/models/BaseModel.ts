@@ -8,11 +8,11 @@ export default class BaseModel {
 		this.MongoDB = new BuilderMongoDB(schema, tableName);
 	}
 
-	public async find(conditions: any, fields: string[] = [], limit = 20, skip = 0, sort = []) {
+	public async find(conditions: any = {}, fields: string[] = [], limit = 20, skip = 0, sort = []) {
 		return await this.MongoDB.find(conditions, fields, limit, skip, sort);
 	}
 
-	public async findOne(conditions: any, fields: string[] = []) {
+	public async findOne(conditions: any = {}, fields: string[] = []) {
 		return await this.MongoDB.findOne(conditions, fields);
 	}
 
