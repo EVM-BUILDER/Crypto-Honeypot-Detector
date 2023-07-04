@@ -79,6 +79,29 @@ class MainController {
         }
     }
 
+    public async queryLocker(_req: IRequest, res: IResponse) {
+        const query = `{
+                lockLPs(where: {lpAddress: "0xdcecf1bf78c9dff67cd41fcf5626a22a3ec035e6"}) {
+                  lpAddress
+                  start
+                  txHash
+                  userAddress
+                }
+            }`
+        const options = {
+            url: 'http://192.168.20.14:8000/subgraphs/name/pulseswap/lookup/graphql',
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            data: JSON.stringify({query})
+        };
+        const result = await axios(options).then((resp: any) => {
+            return resp.data
+        }).catch((e: any) => {
+            return e.response?.data ? e.response.data : e.response
+        });
+        return res.status(200).json({result});
+    }
+
     public async queryLP(_req: IRequest, res: IResponse) {
         try {
             const grapnode = 'http://192.168.20.14:8000/subgraphs/name/pulseswap/exchange-v2';

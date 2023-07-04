@@ -19,11 +19,14 @@ class LockedLPModel extends BaseModel {
     constructor() {
         const schema = {
             chain_id: Number,
+            tx_hash_locker: String,
             tx_hash_locked: String,
             tx_hash_unlock: String,
             lp_address: Array,
+            token_address: String,
             router_address: String,
-            status: {type: String, default: 'locked'} // locked, unlock
+            counter: {type: Number, default: 1},
+            status: {type: String, default: 'locked'} // locked, unlock, locked_forever
         };
         super(schema, 'locked_lp');
     }

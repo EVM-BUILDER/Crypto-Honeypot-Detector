@@ -16,20 +16,27 @@ class Helper {
     // check and add time Locker LP
     public static async checkLockerLP(lp: string, grapnode: string) {
         try {
+            const query = `{
+                lockLPs(where: {lpAddress: "${lp.toLowerCase()}"}) {
+                  lpAddress
+                  start
+                  txHash
+                  userAddress
+                }
+            }`
             const options = {
                 url: grapnode,
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                data: JSON.stringify({
-                    query: `query {
-                        pairs(where: {token0: "${lp.toLowerCase()}"}){
-                          id
-                          name
-                        }
-                      }`
-                })
+                data: JSON.stringify({query})
             };
-            const result = await axios(options).then((resp: any) => resp.data).catch((e: any) => e.response?.data ? e.response.data : e.response);
+            console.log(query)
+            const result = await axios(options).then((resp: any) => {
+                return resp.data
+            }).catch((e: any) => {
+                return e.response?.data ? e.response.data : e.response
+            });
+            console.log('result', result)
             return result?.data?.lockLPs;
         } catch (e) {
             throw e;
@@ -218,15 +225,17 @@ class Helper {
                         chain_id: chainId,
                         tx_hash_locked: tx.transactionHash,
                         lp_address: paramsLock,
+                        token_address: token,
                         router_address: routerAddress,
+                        counter: 1,
                         status: 'locked'
                     });
                 }
-                Helper.postTelegram(`Locked LP - ${JSON.stringify(paramsLock)} success\n chainId: ${chainId}\n router address: ${routerAddress}\n txhash: ${tx.transactionHash}`);
+                Helper.postTelegram(`Token ${token}\n LP - ${JSON.stringify(paramsLock)}\n chainId: ${chainId}\n Router address: ${routerAddress}\n Lock LP success - txhash: ${tx.transactionHash}`);
             }
             return true;
         } catch (e: any) {
-            Helper.postTelegram(`Locked LP - ${JSON.stringify(paramsLock)}\n chainId: ${chainId}\n router address: ${routerAddress}\n Fail: ${e.message}`);
+            Helper.postTelegram(`Token ${token}\n LP - ${JSON.stringify(paramsLock)}\n chainId: ${chainId}\n Router address: ${routerAddress}\n Lock LP Fail: ${e.message}`);
             throw e;
         }
     }
