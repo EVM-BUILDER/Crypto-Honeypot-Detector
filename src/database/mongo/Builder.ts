@@ -31,7 +31,7 @@ export default class BuilderMongoDB {
 		this.schema = schema;
 	}
 
-	public async find(conditions: any | undefined, fields: any = [], limit: number = 100, skip: number = 0, sort: any = {}) {
+	public async find(conditions: any | undefined = {}, fields: any = [], limit: number = 100, skip: number = 0, sort: any = {}) {
 		if (typeof conditions === 'undefined') {
 			conditions = {};
 		}
@@ -65,4 +65,9 @@ export default class BuilderMongoDB {
 		data.modified = Date.now();
 		return this.Client.findByIdAndUpdate(id, data, {new: true});
 	}
+
+	public delete(id: string) {
+		return this.Client.findByIdAndRemove(id);
+	}
+
 }
