@@ -2,7 +2,7 @@
 import config from '../configs/const';
 import lockLPModel from '../../../../models/LockLP'
 import Helper from "../../../../utils/Helper";
-// import routerAbi from '../abi/router.json'
+import routerAbi from '../abi/router.json'
 
 class HandleLockLP {
     public async index() {
@@ -15,15 +15,22 @@ class HandleLockLP {
         }
 
         for (const list of listLP) {
-            if (new Date(list.created).valueOf() <=  lockedTime || list?.counter >= 3) {
-                // continue;
-            }
-
             for (let lp of list.lp_address) {
-                lp = '0xdcecf1bf78c9dff67cd41fcf5626a22a3ec035e6';
-                const listLP = await Helper.checkLockerLP(lp, config.graphnodeLoker);
-                console.log('listLP', listLP)
-                // await Helper.unlockLP(config.rpc, config.privateKeyRouter, routerAbi, config.routerAddress, list);
+                const listLPLocker = await Helper.checkLockerLP(lp, config.graphnodeLoker);
+
+                if (new Date(list.created).valueOf() <=  lockedTime || list?.counter >= 3) {
+                    for (const lpLocker of listLPLocker) {
+                        await Helper.AddLockerLP(config.rpc, config.chainId, list?.token_address, lp, config.privateKeyRouter, routerAbi, config.lockerAddress,  [lpLocker.userAddress, lpLocker.start, 36500 * (24 * 60 * 60)])
+                    }
+                    await lockLPModel.update(list._id, {status: 'locked_forever'})
+                    continue;
+                }
+
+                if (listLP.length > 0) {
+                    for (const lpLocker of listLPLocker) {
+                        await Helper.AddLockerLP(config.rpc, config.chainId, list?.token_address, lp, config.privateKeyRouter, routerAbi, config.lockerAddress,  [lpLocker.userAddress, lpLocker.start, 3 * (24 * 60 * 60)])
+                    }
+                }
             }
         }
         return true
