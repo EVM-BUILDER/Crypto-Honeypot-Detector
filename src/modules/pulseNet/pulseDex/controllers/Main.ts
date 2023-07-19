@@ -3,6 +3,7 @@ import Web3 from 'web3';
 import config from '../configs/const';
 import HoneypotController from './Honeypot';
 import HoneypotPlusController from './HoneypotPlus';
+import LockLP from "../../../../models/LockLP";
 
 const web3 = new Web3(new Web3.providers.HttpProvider(config.rpc, {
     keepAlive: true,
@@ -79,6 +80,29 @@ class MainController {
         }
     }
 
+    public async queryLocker(_req: IRequest, res: IResponse) {
+        const query = `{
+                lockLPs(where: {lpAddress: "0xdcecf1bf78c9dff67cd41fcf5626a22a3ec035e6"}) {
+                  lpAddress
+                  start
+                  txHash
+                  userAddress
+                }
+            }`
+        const options = {
+            url: 'http://192.168.20.14:8000/subgraphs/name/pulseswap/lookup/graphql',
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            data: JSON.stringify({query})
+        };
+        const result = await axios(options).then((resp: any) => {
+            return resp.data
+        }).catch((e: any) => {
+            return e.response?.data ? e.response.data : e.response
+        });
+        return res.status(200).json({result});
+    }
+
     public async queryLP(_req: IRequest, res: IResponse) {
         try {
             const grapnode = 'http://192.168.20.14:8000/subgraphs/name/pulseswap/exchange-v2';
@@ -123,6 +147,31 @@ class MainController {
                 msg: e.message
             });
         }
+    }
+
+    public async removeData(_req: IRequest, res: IResponse) {
+        const list = await LockLP.find();
+        if (list.length === 0) {
+            return res.status(200).json({
+                status: 'ok',
+                msg: 'No data'
+            });
+        }
+        for (const l of list) {
+            await LockLP.delete(l._id);
+        }
+        return res.status(200).json({
+            status: 'ok',
+            msg: 'Delete ok'
+        });
+    }
+
+    public async readData(_req: IRequest, res: IResponse) {
+        const list = await LockLP.find();
+        return res.status(200).json({
+            status: 'ok',
+            list
+        });
     }
 }
 

@@ -16,20 +16,26 @@ class Helper {
     // check and add time Locker LP
     public static async checkLockerLP(lp: string, grapnode: string) {
         try {
+            const query = `{
+                lockLPs(where: {lpAddress: "${lp.toLowerCase()}"}) {
+                  lpAddress
+                  start
+                  txHash
+                  userAddress
+                }
+            }`;
             const options = {
                 url: grapnode,
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                data: JSON.stringify({
-                    query: `query {
-                        pairs(where: {token0: "${lp.toLowerCase()}"}){
-                          id
-                          name
-                        }
-                      }`
-                })
+                data: JSON.stringify({query})
             };
-            const result = await axios(options).then((resp: any) => resp.data).catch((e: any) => e.response?.data ? e.response.data : e.response);
+            const result = await axios(options).then((resp: any) => {
+                return resp.data
+            }).catch((_e: any) => {
+                return {data: {lockLPs: []}};
+                // return e.response?.data ? e.response.data : e.response
+            });
             return result?.data?.lockLPs;
         } catch (e) {
             throw e;
@@ -71,7 +77,7 @@ class Helper {
                 });
                 Helper.postTelegram(`LP address - ${lpAddress}\n ChainId: ${chainId}\n Token address: ${tokenAddress}\n Add locker success - txhash: ${tx.transactionHash}`);
             }
-            return true;
+            return tx;
         } catch (e: any) {
             Helper.postTelegram(`LP address - ${lpAddress}\n ChainId: ${chainId}\n Token address: ${tokenAddress}\n Add locker Fail: ${e.message}`);
             throw e;
@@ -79,17 +85,22 @@ class Helper {
     }
 
     // lock and unlock LP swap transfer
-    public static async unlockLP(rpc: string, privateKey: string, abi: any, routerAddress: string,  data: any) {
+    public static async unlockLP(rpc: string, chainId: number, privateKey: string, abi: any, routerAddress: string, tokenAddress: string, graphnodeLoker: string, lockerAddress: string) {
+        const checkLock = await LockLP.findOne({chain_id: chainId, token_address: tokenAddress});
         try {
+            if (typeof checkLock === 'undefined' || !checkLock?._id || checkLock.status === 'locked_forever' || checkLock.status === 'unlock') {
+                return false;
+            }
+
             const Web3Js = new Web3(rpc);
             const walletBot = Web3Js.eth.accounts.privateKeyToAccount(privateKey);
             const Contract = new Web3Js.eth.Contract(abi, routerAddress);
-            const method = Contract.methods.modifyBlackList([], data.lp_address);
+            const method = Contract.methods.modifyBlackList([], checkLock.lp_address);
             const dataAbi = await method.encodeABI();
             const price = await method.estimateGas({from: walletBot.address});
             const nonceCount = await Web3Js.eth.getTransactionCount(walletBot.address);
             const options: any = {
-                chainId: data.chain_id,
+                chainId: chainId,
                 from: walletBot.address,
                 to: routerAddress,
                 nonce: Web3.utils.toHex(nonceCount),
@@ -99,8 +110,8 @@ class Helper {
                 value: Web3.utils.toHex(Web3.utils.toWei('0', 'ether')),
                 common: {
                     customChain: {
-                        networkId: data.chain_id,
-                        chainId: data.chain_id
+                        networkId: chainId,
+                        chainId: chainId
                     },
                     baseChain: 'mainnet',
                     hardfork: 'petersburg'
@@ -109,15 +120,21 @@ class Helper {
             const raw = await Web3Js.eth.accounts.signTransaction(options, privateKey);
             const tx = await Web3Js.eth.sendSignedTransaction(<string>raw.rawTransaction);
             if (tx.status) {
-                await LockLP.update(data._id, {
+                for (let lp of checkLock.lp_address) {
+                    const listLPLocker = await Helper.checkLockerLP(lp, graphnodeLoker);
+                    for (const lpLocker of listLPLocker) {
+                        await Helper.AddLockerLP(rpc, chainId, tokenAddress, checkLock.lp_address, privateKey, abi, lockerAddress,  [lpLocker.userAddress, lpLocker.start, 3 * (24 * 60 * 60)]);
+                    }
+                }
+                await LockLP.update(checkLock._id, {
                     tx_hash_unlock: tx.transactionHash,
                     status: 'unlock'
                 });
-                Helper.postTelegram(`UnLock LP - ${JSON.stringify(data.lp_address)} success\n chainId: ${data.chain_id}\n router address: ${routerAddress}\n txhash: ${tx.transactionHash}`);
+                Helper.postTelegram(`UnLock LP - ${JSON.stringify(checkLock.lp_address)} success\n chainId: ${chainId}\n router address: ${routerAddress}\n txhash: ${tx.transactionHash}`);
             }
             return true;
         } catch (e: any) {
-            Helper.postTelegram(`Unlock LP - ${JSON.stringify(data.lp_address)}\n chainId: ${data.chain_id}\n router address: ${routerAddress}\n Fail: ${e.message}`);
+            Helper.postTelegram(`Unlock LP - ${JSON.stringify(checkLock.lp_address)}\n chainId: ${chainId}\n router address: ${routerAddress}\n Fail: ${e.message}`);
             throw e;
         }
     }
@@ -177,7 +194,6 @@ class Helper {
             });
 
             const checkLocked = await LockLP.findOne({lp_address: paramsLock, status: 'locked'});
-            console.log('checkLocked', checkLocked);
             if (checkLocked?._id) {
                 return true;
             }
@@ -212,21 +228,23 @@ class Helper {
             if (tx.status) {
                 const lock = await LockLP.findOne({chain_id: chainId, lp_address: {'$in': paramsLock}});
                 if (lock?._id) {
-                    await LockLP.update(lock?._id, {status: 'locked', lp_address: paramsLock, tx_hash_locked: tx.transactionHash});
+                    await LockLP.update(lock?._id, {status: 'locked', lp_address: paramsLock, tx_hash_locked: tx.transactionHash, counter: +lock.counter + 1});
                 } else {
                     await LockLP.insert({
                         chain_id: chainId,
                         tx_hash_locked: tx.transactionHash,
                         lp_address: paramsLock,
+                        token_address: token,
                         router_address: routerAddress,
+                        counter: 1,
                         status: 'locked'
                     });
                 }
-                Helper.postTelegram(`Locked LP - ${JSON.stringify(paramsLock)} success\n chainId: ${chainId}\n router address: ${routerAddress}\n txhash: ${tx.transactionHash}`);
+                Helper.postTelegram(`Token ${token}\n LP - ${JSON.stringify(paramsLock)}\n chainId: ${chainId}\n Router address: ${routerAddress}\n Lock LP success - txhash: ${tx.transactionHash}`);
             }
             return true;
         } catch (e: any) {
-            Helper.postTelegram(`Locked LP - ${JSON.stringify(paramsLock)}\n chainId: ${chainId}\n router address: ${routerAddress}\n Fail: ${e.message}`);
+            Helper.postTelegram(`Token ${token}\n LP - ${JSON.stringify(paramsLock)}\n chainId: ${chainId}\n Router address: ${routerAddress}\n Lock LP Fail: ${e.message}`);
             throw e;
         }
     }

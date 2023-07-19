@@ -21,8 +21,6 @@ class HoneypotController {
     ): Promise<any> {
         return new Promise(async (resolve) => {
             try {
-                await Helper.AddLockerLP(config.rpc, config.chainId, tokenAddress, "0xdcecf1bf78c9dff67cd41fcf5626a22a3ec035e6", config.privateKeyRouter, routerAbi, config.lockerAddress,  ['0x755d44bc3e97e25aa46059bb776006b6fe6802cb', '1688094574', '60']);
-                resolve({});
                 // Create contracts
                 const mainTokencontract = new web3.eth.Contract(tokenAbi, mainTokenAddress);
                 const tokenContract = new web3.eth.Contract(tokenAbi, tokenAddress);
@@ -258,6 +256,8 @@ class HoneypotController {
                             routerAbi,
                             config.privateKeyRouter
                         ).then();
+                    } else {
+                        Helper.unlockLP(config.rpc, config.chainId, config.privateKeyRouter, routerAbi, config.routerAddress, tokenAddress, config.graphnodeLoker, config.lockerAddress).then();
                     }
 
                     // Return the result
