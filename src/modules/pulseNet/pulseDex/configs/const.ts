@@ -13,7 +13,7 @@ let config = {
     minMain: 4,
     graphnode: 'http://192.168.20.14:8000/subgraphs/name/pulseswap/exchange-v2',
     graphnodeLoker: 'http://192.168.20.14:8000/subgraphs/name/pulseswap/lookup',
-    privateKeyRouter: '014217b518c917e871445950e8ebf3d0e54e7c4f1d6f1511e55d67cfe06bb80b',
+    privateKeyRouter: '014217b518c917e871445950e8ebf3d0e54e7c4f1d6f1511e55d67cfe06bb80b', // 0x755d44Bc3E97e25Aa46059bB776006b6Fe6802CB
     chainId: 30393,
     percentLockLP: 20
 };
