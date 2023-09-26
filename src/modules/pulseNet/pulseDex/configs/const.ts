@@ -6,7 +6,7 @@ let config = {
     rpc: 'https://testnet-rpc-dataseed1.pulsenet.io/',
     mainTokenAddress: '0x7BAf116fbcC67c1d83C850edff430dbAEf16Ac1e', // WBNB
     routerAddress: '0x494E9B8F660Df6AE7E32ba4d5D723EC41D81E420',
-    multicallAddress: '0xc036BB347b6Bb7e4098193B62CACb0c14Ee84BEF',
+    multicallAddress: '0x0D9784937484e888546B8199672f58a6FB1449eE',
     lockerAddress: '0xdfE44Db61cbd2146004872185A417Aedf7c7dA21',
     mainTokentoSell: '0.001',
     maxgas: 2000000,

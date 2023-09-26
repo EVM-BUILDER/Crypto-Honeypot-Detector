@@ -19,6 +19,7 @@ class MainController {
         res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type'); // If needed
         try {
             const tokenAddress = req.params.address;
+            
             if (`${req.params.address2}`.toLowerCase() == config.mainTokenAddress.toLowerCase() || `${req.params.address2}`.toLowerCase() == 'default') {
                 const honeypot = await HoneypotController.Honeypot(
                     web3,
@@ -46,6 +47,7 @@ class MainController {
                     data: honeypot,
                 });
             }
+            
             const honeypotPlus = await HoneypotPlusController.HoneypotPlus(
                 web3,
                 tokenAddress,

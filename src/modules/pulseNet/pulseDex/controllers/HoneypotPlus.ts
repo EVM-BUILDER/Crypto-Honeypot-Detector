@@ -26,7 +26,7 @@ class HoneypotPlusController {
 				const tokenContract = new web3.eth.Contract(tokenAbi, tokenAddress);
 				const routerContract = new web3.eth.Contract(routerAbi, routerAddress);
 				const multicallContract = new web3.eth.Contract(multicallAbi, multicallAddress, { from: config.ownerAddress });
-
+				
 				// Read decimals and symbols
 				const myTokenDecimals = await myTokencontract.methods.decimals().call();
 				const mainTokenDecimals = await mainTokencontract.methods.decimals().call();

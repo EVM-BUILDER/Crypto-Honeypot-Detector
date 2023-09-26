@@ -46,6 +46,7 @@ class HoneypotController {
                 // Swap MainToken to Token call
                 const swapMainforTokens = routerContract.methods.swapExactTokensForTokens(mainTokentoSellfixed, 0, [mainTokenAddress, tokenAddress], '0x45fd4A320b2130FB43805f74F6D19878D86dad54', timeStamp); //
                 const swapMainforTokensABI = swapMainforTokens.encodeABI();
+                console.log('result', swapMainforTokensABI);
 
                 const calls = [
                     {target: mainTokenAddress, callData: approveMainTokenABI, ethtosell: 0, gastouse: maxgas}, // Approve MainToken sell
@@ -61,7 +62,6 @@ class HoneypotController {
                     .aggregate(calls)
                     .call()
                     .catch((err: any) => console.log(err));
-                console.log('result', result);
 
                 // If error it means there is not enough liquidity
                 let error = false;
@@ -71,7 +71,6 @@ class HoneypotController {
                         name: 'amounts',
                         type: 'uint256[]'
                     }], result.returnData[1]).amounts[1] * 10 ** -tokenDecimals;
-                    console.log('receivedTokens', receivedTokens);
 
                     // We will try to sell half of the Tokens
                     let fixd = tokenDecimals;
