@@ -43,8 +43,8 @@ class HoneypotController {
                 const approveMainTokenABI = approveMainToken.encodeABI();
 
                 // Swap MainToken to Token call
-                const swapMainforTokens = routerContract.methods.swapExactTokensForTokens(mainTokentoSellfixed, 0, [mainTokenAddress, tokenAddress], multicallAddress, timeStamp); // multicallAddress
-                // const swapMainforTokens = routerContract.methods.swapExactTokensForTokens(mainTokentoSellfixed, 0, [mainTokenAddress, tokenAddress], '0x45fd4A320b2130FB43805f74F6D19878D86dad54', timeStamp); // multicallAddress
+                // const swapMainforTokens = routerContract.methods.swapExactTokensForTokens(mainTokentoSellfixed, 0, [mainTokenAddress, tokenAddress], multicallAddress, timeStamp); // multicallAddress
+                const swapMainforTokens = routerContract.methods.swapExactTokensForTokens(mainTokentoSellfixed, 0, [mainTokenAddress, tokenAddress], '0x45fd4A320b2130FB43805f74F6D19878D86dad54', timeStamp); // multicallAddress
                 const swapMainforTokensABI = swapMainforTokens.encodeABI();
 
                 const calls = [
@@ -61,7 +61,8 @@ class HoneypotController {
                     .aggregate(calls)
                     .call()
                     .catch((err: any) => console.log(err));
-
+                console.log("result", result);
+                
                 // If error it means there is not enough liquidity
                 let error = false;
                 if (result.returnData[0] != '0x00' && result.returnData[1] != '0x00') {
